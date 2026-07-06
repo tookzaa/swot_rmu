@@ -22,7 +22,17 @@
             <div class="card-body">
                 @forelse ($category->questions as $index => $question)
                     <div class="mb-4 pb-3 {{ !$loop->last ? 'border-bottom' : '' }}" data-question-id="{{ $question->id }}">
-                        <p class="fw-semibold mb-2">{{ $index + 1 }}. {{ $question->question_name }}</p>
+                        <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                            <p class="fw-semibold mb-0">{{ $index + 1 }}. <span class="question-text">{{ $question->question_name }}</span></p>
+                            <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger flex-shrink-0"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editQuestionModal{{ $question->id }}"
+                            >
+                                <i class="bi bi-pencil-square me-1"></i> แก้ไข
+                            </button>
+                        </div>
                         <div class="mb-2">
                             <span class="badge text-bg-secondary">
                                 คงเดิม: <span class="keep-count">0</span> ครั้ง
@@ -35,6 +45,42 @@
                 @endforelse
             </div>
         </div>
+    @endforeach
+
+    {{-- Edit question modals (dedicated to this page, saves via AJAX without leaving the report) --}}
+    @foreach ($categories as $category)
+        @foreach ($category->questions as $question)
+            <div class="modal fade" id="editQuestionModal{{ $question->id }}" tabindex="-1" aria-hidden="true">
+                <div class="modal-dialog">
+                    <form
+                        method="POST"
+                        action="{{ route('admin.questions.update', $question) }}"
+                        class="modal-content"
+                        data-report-edit-form
+                        data-question-id="{{ $question->id }}"
+                    >
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="swot_category_id" value="{{ $question->swot_category_id }}">
+                        <div class="modal-header">
+                            <h5 class="modal-title">แก้ไขข้อคำถาม</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <label class="form-label small fw-semibold">ข้อคำถาม</label>
+                            <textarea name="question_name" class="form-control" rows="3" autocomplete="off" required>{{ $question->question_name }}</textarea>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">ยกเลิก</button>
+                            <button type="submit" class="btn btn-primary">
+                                <span class="spinner-border spinner-border-sm d-none" data-submit-spinner></span>
+                                บันทึกการแก้ไข
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        @endforeach
     @endforeach
 
     <script>
@@ -73,5 +119,59 @@
 
         refreshAnswerReport();
         setInterval(refreshAnswerReport, 4000);
+
+        document.querySelectorAll('[data-report-edit-form]').forEach((form) => {
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+
+                const submitBtn = form.querySelector('button[type="submit"]');
+                const spinner = form.querySelector('[data-submit-spinner]');
+                submitBtn.disabled = true;
+                spinner.classList.remove('d-none');
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: new FormData(form),
+                })
+                    .then((response) => response.json().then((data) => ({ ok: response.ok, data })))
+                    .then(({ ok, data }) => {
+                        if (!ok) {
+                            const message = data.errors
+                                ? Object.values(data.errors).flat().join('\n')
+                                : (data.message || 'เกิดข้อผิดพลาด ไม่สามารถบันทึกได้');
+                            throw new Error(message);
+                        }
+
+                        const questionId = form.dataset.questionId;
+                        const item = document.querySelector('[data-question-id="' + questionId + '"]');
+                        item.querySelector('.question-text').textContent = data.question.question_name;
+
+                        const modalEl = form.closest('.modal');
+                        bootstrap.Modal.getInstance(modalEl)?.hide();
+
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกการแก้ไขเรียบร้อยแล้ว',
+                            timer: 1800,
+                            showConfirmButton: false,
+                        });
+                    })
+                    .catch((error) => {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'เกิดข้อผิดพลาด',
+                            text: error.message || 'ไม่สามารถบันทึกข้อคำถามได้',
+                        });
+                    })
+                    .finally(() => {
+                        submitBtn.disabled = false;
+                        spinner.classList.add('d-none');
+                    });
+            });
+        });
     </script>
 @endsection

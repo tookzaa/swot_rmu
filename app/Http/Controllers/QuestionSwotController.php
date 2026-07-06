@@ -51,6 +51,13 @@ class QuestionSwotController extends Controller
 
         ActivityLogger::log('update_question_swot', null, 'แก้ไขข้อคำถาม SWOT #' . $question->id);
 
+        if ($request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'question' => $question->fresh(),
+            ]);
+        }
+
         return redirect()->route('admin.questions.index')->with('success', 'แก้ไขข้อคำถามเรียบร้อยแล้ว');
     }
 
