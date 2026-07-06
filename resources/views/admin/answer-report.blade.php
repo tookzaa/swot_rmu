@@ -61,7 +61,7 @@
                             listEl.innerHTML = 'ยังไม่มีรายการแก้ไข';
                         } else {
                             listEl.innerHTML = '<ul class="mb-0 ps-3">' + editedItems.map((item) =>
-                                `<li>${escapeHtml(item.detail)} <span class="text-muted">(${escapeHtml(item.user)}, ${escapeHtml(item.created_at ?? '')})</span></li>`
+                                `<li>${escapeHtml(item.detail)}</li>`
                             ).join('') + '</ul>';
                         }
                     });
