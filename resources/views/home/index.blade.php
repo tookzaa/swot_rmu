@@ -177,7 +177,7 @@
                 $codeKey = strtoupper(trim($category->code));
                 $style = $swotPalette[$codeKey] ?? $fallbackPalette[$index % count($fallbackPalette)];
             @endphp
-            <div class="col-6 col-md-4 col-lg-3">
+            <div class="col-12 col-md-6 col-lg-3">
                 <a
                     href="{{ route('swot.answer.show', $category) }}"
                     class="text-decoration-none swot-category-card d-flex flex-column align-items-center justify-content-center text-center"

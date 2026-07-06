@@ -21,16 +21,16 @@ Route::get('/', function () {
 Route::get('/home', [HomeController::class, 'index'])->name('home.index');
 
 Route::get('/swot/categories/{category}', [SwotAnswerController::class, 'show'])->name('swot.answer.show');
-Route::post('/swot/questions/{question}/answer', [SwotAnswerController::class, 'store'])->name('swot.answer.store');
+Route::post('/swot/questions/{question}/answer', [SwotAnswerController::class, 'store'])->middleware('throttle:30,1')->name('swot.answer.store');
 
 Route::get('/vote', [SwotVoteController::class, 'index'])->name('vote.index');
 Route::get('/vote/graph', [SwotVoteController::class, 'graph'])->name('vote.graph');
 Route::get('/vote/categories/{category}', [SwotVoteController::class, 'show'])->name('vote.show');
 Route::get('/vote/categories/{category}/summary', [SwotVoteController::class, 'summary'])->name('vote.summary');
-Route::post('/vote/questions/{question}/answer', [SwotVoteController::class, 'store'])->name('vote.store');
+Route::post('/vote/questions/{question}/answer', [SwotVoteController::class, 'store'])->middleware('throttle:30,1')->name('vote.store');
 
 Route::get('/strategic/sub-topics/{subTopic}', [StrategicIndicatorAnswerController::class, 'show'])->name('strategic.answer.show');
-Route::post('/strategic/indicators/{indicator}/answer', [StrategicIndicatorAnswerController::class, 'store'])->name('strategic.answer.store');
+Route::post('/strategic/indicators/{indicator}/answer', [StrategicIndicatorAnswerController::class, 'store'])->middleware('throttle:30,1')->name('strategic.answer.store');
 
 Route::get('/login', [AuthController::class, 'login'])->name('login');
 Route::post('/login', [AuthController::class, 'authenticate'])->name('login.authenticate');

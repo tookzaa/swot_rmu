@@ -22,6 +22,7 @@
                             <th>#</th>
                             <th>รหัสหมวด</th>
                             <th>ชื่อหมวด</th>
+                            <th>สถานะการโหวต</th>
                             <th class="text-end">จัดการ</th>
                         </tr>
                     </thead>
@@ -31,6 +32,13 @@
                                 <td>{{ $index + 1 }}</td>
                                 <td><span class="badge text-bg-primary">{{ $category->code }}</span></td>
                                 <td>{{ $category->category_name }}</td>
+                                <td>
+                                    @if ($category->vote_status == \App\Models\SwotCategory::VOTE_OPEN)
+                                        <span class="badge text-bg-success">เปิดการโหวต</span>
+                                    @else
+                                        <span class="badge text-bg-secondary">ปิดการโหวต</span>
+                                    @endif
+                                </td>
                                 <td class="text-end">
                                     <button
                                         type="button"
@@ -52,7 +60,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="4" class="text-center text-muted py-4">ยังไม่มีหมวด SWOT ในระบบ</td>
+                                <td colspan="5" class="text-center text-muted py-4">ยังไม่มีหมวด SWOT ในระบบ</td>
                             </tr>
                         @endforelse
                     </tbody>

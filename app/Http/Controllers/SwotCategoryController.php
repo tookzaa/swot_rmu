@@ -22,7 +22,10 @@ class SwotCategoryController extends Controller
         $data = $request->validate([
             'code' => 'required|string|max:100|unique:swot_categories,code',
             'category_name' => 'required|string|max:10000',
+            'vote_status' => 'nullable|integer|in:' . SwotCategory::VOTE_CLOSED . ',' . SwotCategory::VOTE_OPEN,
         ]);
+
+        $data['vote_status'] = $data['vote_status'] ?? SwotCategory::VOTE_CLOSED;
 
         $category = SwotCategory::create($data);
 
@@ -37,7 +40,10 @@ class SwotCategoryController extends Controller
         $data = $request->validate([
             'code' => 'required|string|max:100|unique:swot_categories,code,' . $category->id,
             'category_name' => 'required|string|max:100',
+            'vote_status' => 'nullable|integer|in:' . SwotCategory::VOTE_CLOSED . ',' . SwotCategory::VOTE_OPEN,
         ]);
+
+        $data['vote_status'] = $data['vote_status'] ?? SwotCategory::VOTE_CLOSED;
 
         $category->update($data);
 

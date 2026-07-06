@@ -19,14 +19,34 @@
             background: #224abe;
             background: linear-gradient(90deg, #224abe 0%, #1b3a94 100%);
             padding: .75rem 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
             color: #fff;
         }
         .topbar .brand {
             font-weight: 700;
             font-size: 1.1rem;
+        }
+        .topbar .navbar-toggler {
+            border-color: rgba(255,255,255,.5);
+        }
+        .topbar .navbar-toggler:focus {
+            box-shadow: 0 0 0 .2rem rgba(255,255,255,.25);
+        }
+        @media (max-width: 767.98px) {
+            .topbar-menu {
+                margin-top: .75rem;
+                padding-top: .75rem;
+                border-top: 1px solid rgba(255,255,255,.15);
+                align-items: stretch !important;
+            }
+            .topbar-menu .btn-topbar {
+                width: 100%;
+            }
+            .topbar-menu form {
+                width: 100%;
+            }
+            .topbar-menu .text-end {
+                text-align: left !important;
+            }
         }
         .avatar-circle {
             width: 36px;
@@ -98,41 +118,48 @@
     @stack('styles')
 </head>
 <body>
-    <div class="topbar">
-        <div class="brand"><i class="bi bi-clipboard-data me-1"></i> ระบบประเมิน SWOT</div>
-        <div class="d-flex align-items-center gap-3">
-            @if (session('logged_in'))
-                <div class="text-end d-none d-sm-block">
-                    <div class="fw-semibold small">{{ session('USERFULLNAME', 'ผู้ใช้งาน') }}</div>
-                    <div class="text-white-50" style="font-size: .75rem;">{{ session('role') === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งานทั่วไป' }}</div>
+    <nav class="topbar navbar navbar-expand-md navbar-dark">
+        <div class="container-fluid d-flex align-items-center justify-content-between flex-wrap px-0">
+            <div class="brand"><i class="bi bi-clipboard-data me-1"></i> ระบบประเมิน SWOT</div>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#topbarMenu" aria-controls="topbarMenu" aria-expanded="false" aria-label="เปิด/ปิดเมนู">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse flex-grow-0" id="topbarMenu">
+                <div class="topbar-menu d-flex flex-column flex-md-row align-items-md-center gap-3">
+                    @if (session('logged_in'))
+                        <div class="text-end d-none d-sm-block">
+                            <div class="fw-semibold small">{{ session('USERFULLNAME', 'ผู้ใช้งาน') }}</div>
+                            <div class="text-white-50" style="font-size: .75rem;">{{ session('role') === 'admin' ? 'ผู้ดูแลระบบ' : 'ผู้ใช้งานทั่วไป' }}</div>
+                        </div>
+                        <div class="avatar-circle d-none d-md-flex">
+                            {{ mb_substr(session('USERFULLNAME', 'U'), 0, 1) }}
+                        </div>
+                        @if (session('role') === 'admin')
+                            <a href="{{ route('admin.index') }}" class="btn btn-sm btn-outline-light btn-topbar">
+                                <i class="bi bi-speedometer2 me-1"></i> แดชบอร์ด
+                            </a>
+                        @endif
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="btn btn-sm btn-outline-light btn-topbar">
+                                <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
+                            </button>
+                        </form>
+                    @else
+                        <a href="{{ route('home.index') }}" class="btn btn-sm btn-outline-light btn-topbar">
+                            <i class="bi bi-house-door me-1"></i> หน้าแรก
+                        </a>
+                        <a href="{{ route('vote.index') }}" class="btn btn-sm btn-topbar btn-vote">
+                            <i class="bi bi-check2-circle me-1"></i> โหวต SWOT
+                        </a>
+                        <a href="{{ route('login') }}" class="btn btn-sm btn-outline-light btn-topbar">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> เข้าสู่ระบบ
+                        </a>
+                    @endif
                 </div>
-                <div class="avatar-circle">
-                    {{ mb_substr(session('USERFULLNAME', 'U'), 0, 1) }}
-                </div>
-                @if (session('role') === 'admin')
-                    <a href="{{ route('admin.index') }}" class="btn btn-sm btn-outline-light btn-topbar">
-                        <i class="bi bi-speedometer2 me-1"></i> แดชบอร์ด
-                    </a>
-                @endif
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-light btn-topbar">
-                        <i class="bi bi-box-arrow-right me-1"></i> ออกจากระบบ
-                    </button>
-                </form>
-            @else
-                <a href="{{ route('home.index') }}" class="btn btn-sm btn-outline-light btn-topbar">
-                    <i class="bi bi-house-door me-1"></i> หน้าแรก
-                </a>
-                <a href="{{ route('vote.index') }}" class="btn btn-sm btn-topbar btn-vote">
-                    <i class="bi bi-check2-circle me-1"></i> โหวต SWOT
-                </a>
-                <a href="{{ route('login') }}" class="btn btn-sm btn-outline-light btn-topbar">
-                    <i class="bi bi-box-arrow-in-right me-1"></i> เข้าสู่ระบบ
-                </a>
-            @endif
+            </div>
         </div>
-    </div>
+    </nav>
 
     <div class="content-wrapper">
         @if (session('success'))

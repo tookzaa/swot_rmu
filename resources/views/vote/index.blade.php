@@ -15,6 +15,14 @@
             transform: translateY(-4px);
             box-shadow: 0 .5rem 1.25rem rgba(0,0,0,.18);
         }
+        .vote-category-card.is-closed {
+            cursor: not-allowed;
+            opacity: .65;
+        }
+        .vote-category-card.is-closed:hover {
+            transform: none;
+            box-shadow: 0 .25rem .75rem rgba(0,0,0,.12);
+        }
         .vote-category-icon {
             width: 56px;
             height: 56px;
@@ -104,9 +112,12 @@
 
     <div class="row g-3">
         @foreach ($order as $code => $style)
-            @php $category = $categories->get($code); @endphp
+            @php
+                $category = $categories->get($code);
+                $isVotingOpen = $category && $category->vote_status == \App\Models\SwotCategory::VOTE_OPEN;
+            @endphp
             <div class="col-6 col-md-3">
-                @if ($category)
+                @if ($category && $isVotingOpen)
                     <a
                         href="{{ route('vote.show', $category) }}"
                         class="text-decoration-none vote-category-card d-flex flex-column align-items-center justify-content-center text-center"
@@ -117,6 +128,18 @@
                         </div>
                         <div class="vote-category-name">{{ $category->category_name }}</div>
                     </a>
+                @elseif ($category)
+                    <div
+                        class="vote-category-card is-closed d-flex flex-column align-items-center justify-content-center text-center"
+                        style="background-color: {{ $style['color'] }};"
+                        data-vote-closed
+                        role="button"
+                    >
+                        <div class="vote-category-icon">
+                            <i class="bi {{ $style['icon'] }}"></i>
+                        </div>
+                        <div class="vote-category-name">{{ $category->category_name }}</div>
+                    </div>
                 @else
                     <div
                         class="vote-category-card d-flex flex-column align-items-center justify-content-center text-center opacity-50"
@@ -151,6 +174,27 @@
     </div>
 
     @push('scripts')
+        <script>
+            document.querySelectorAll('[data-vote-closed]').forEach((card) => {
+                card.addEventListener('click', function () {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ยังไม่เปิดให้โหวต',
+                        text: 'ระบบยังไม่เปิดระบบให้โหวต กรุณารอผู้ดูแลระบบเปิดสำหรับการโหวต',
+                        confirmButtonText: 'รับทราบ',
+                    });
+                });
+            });
+
+            @if (session('vote_closed'))
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ยังไม่เปิดให้โหวต',
+                    text: @json(session('vote_closed')),
+                    confirmButtonText: 'รับทราบ',
+                });
+            @endif
+        </script>
         <script>
             (function () {
                 const svgNS = 'http://www.w3.org/2000/svg';

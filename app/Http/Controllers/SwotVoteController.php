@@ -26,6 +26,12 @@ class SwotVoteController extends Controller
 
     public function show(Request $request, SwotCategory $category)
     {
+        if (! $category->isVotingOpen()) {
+            return redirect()
+                ->route('vote.index')
+                ->with('vote_closed', 'ระบบยังไม่เปิดระบบให้โหวต กรุณารอผู้ดูแลระบบเปิดสำหรับการโหวต');
+        }
+
         $voterToken = $request->cookie(self::COOKIE_NAME);
 
         $questions = $category->questions()->orderBy('id')->get();
@@ -45,6 +51,16 @@ class SwotVoteController extends Controller
 
     public function store(Request $request, QuestionSwot $question)
     {
+        if (! $question->category->isVotingOpen()) {
+            $message = 'ระบบยังไม่เปิดระบบให้โหวต กรุณารอผู้ดูแลระบบเปิดสำหรับการโหวต';
+
+            if ($request->wantsJson()) {
+                return response()->json(['message' => $message], 403);
+            }
+
+            return redirect()->route('vote.index')->with('vote_closed', $message);
+        }
+
         $data = $request->validate([
             'score' => 'required|integer|min:1|max:5',
         ]);

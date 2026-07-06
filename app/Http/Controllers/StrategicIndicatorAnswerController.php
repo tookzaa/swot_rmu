@@ -41,8 +41,12 @@ class StrategicIndicatorAnswerController extends Controller
     {
         $data = $request->validate([
             'answer_type' => 'required|in:' . StrategicIndicatorAnswer::TYPE_KEEP . ',' . StrategicIndicatorAnswer::TYPE_EDITED,
-            'answer_detail' => 'nullable|string|required_if:answer_type,' . StrategicIndicatorAnswer::TYPE_EDITED,
+            'answer_detail' => 'nullable|string|max:2000|required_if:answer_type,' . StrategicIndicatorAnswer::TYPE_EDITED,
         ]);
+
+        if (isset($data['answer_detail'])) {
+            $data['answer_detail'] = strip_tags(trim($data['answer_detail']));
+        }
 
         $respondentToken = $request->cookie(self::COOKIE_NAME) ?: (string) Str::uuid();
 
